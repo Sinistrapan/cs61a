@@ -148,6 +148,9 @@ def autocorrect(typed_word, word_list, diff_function, limit):
     'testing'
     """
     # BEGIN PROBLEM 5
+    if typed_word in word_list:
+        return typed_word
+
     # Initialize minimum difference as positive infinity
     min_difference = float('inf')
     closest_match = typed_word  # Initialize closest match as the typed word itself
@@ -163,7 +166,8 @@ def autocorrect(typed_word, word_list, diff_function, limit):
     if min_difference > limit:
         return typed_word  # If the minimum difference exceeds the limit, return the typed word
     else:
-        return closest_match  # Otherwise, return the closest match    # END PROBLEM 5
+        return closest_match  # Otherwise, return the closest match
+    # END PROBLEM 5
 
 
 def feline_fixes(typed, source, limit):
@@ -189,7 +193,17 @@ def feline_fixes(typed, source, limit):
     5
     """
     # BEGIN PROBLEM 6
-    assert False, 'Remove this line'
+    if typed == source:
+        return 0
+
+    if limit == 0:
+        return max(len(typed), len(source))
+
+    if min(len(typed), len(source)) == 0:
+        return max(len(typed), len(source))
+
+    diff = 1 if typed[0] != source[0] else 0
+    return diff + feline_fixes(typed[1:], source[1:], limit - diff)
     # END PROBLEM 6
 
 
@@ -208,23 +222,23 @@ def minimum_mewtations(typed, source, limit):
     >>> minimum_mewtations("ckiteus", "kittens", big_limit) # ckiteus -> kiteus -> kitteus -> kittens
     3
     """
-    assert False, 'Remove this line'
-    if ___________:  # Base cases should go here, you may add more base cases as needed.
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-    # Recursive cases should go below here
-    if ___________:  # Feel free to remove or add additional cases
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-    else:
-        add = ...  # Fill in these lines
-        remove = ...
-        substitute = ...
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
+    # BEGIN PROBLEM 7
+    if typed == source:
+        return 0
+
+    if limit < 0:
+        return 1
+
+    if min(len(typed), len(source)) == 0:
+        return max(len(typed), len(source))
+
+    add_diff = 1 + minimum_mewtations(typed, source[1:], limit - 1)
+    remove_diff = 1 + minimum_mewtations(typed[1:], source, limit - 1)
+    substitute_diff = (typed[0] != source[0]) + minimum_mewtations(
+        typed[1:], source[1:], limit - (typed[0] != source[0]))
+
+    return min(add_diff, remove_diff, substitute_diff)
+    # END PROBLEM 7
 
 
 def final_diff(typed, source, limit):
@@ -265,7 +279,16 @@ def report_progress(typed, prompt, user_id, upload):
     0.2
     """
     # BEGIN PROBLEM 8
-    "*** YOUR CODE HERE ***"
+    num_correct = 0
+    for i in range(len(typed)):
+        if typed[i] == prompt[i]:
+            num_correct += 1
+        else:
+            break
+
+    progress = num_correct / len(prompt)
+    upload({'id': user_id, 'progress': progress})
+    return progress
     # END PROBLEM 8
 
 
@@ -287,7 +310,18 @@ def time_per_word(words, times_per_player):
     [[6, 3, 6, 2], [10, 6, 1, 2]]
     """
     # BEGIN PROBLEM 9
-    "*** YOUR CODE HERE ***"
+    num_players = len(times_per_player)
+    num_words = len(words)
+    times = [[] for _ in range(num_players)]
+
+    for player_times in times_per_player:
+        start_time = player_times[0]
+        for i in range(1, len(player_times)):
+            word_time = player_times[i] - player_times[i-1]
+            times[i-1].append(word_time)
+
+    match = match(words, times)
+    return match
     # END PROBLEM 9
 
 
@@ -310,8 +344,24 @@ def fastest_words(match):
                            )  # contains an *index* for each player
     # contains an *index* for each word
     word_indices = range(len(get_all_words(match)))
+
     # BEGIN PROBLEM 10
-    "*** YOUR CODE HERE ***"
+    # Initialize an empty list for each player
+    fastest = [[] for _ in player_indices]
+
+    for word_index in word_indices:
+        # Initialize the fastest time as positive infinity
+        fastest_time = float('inf')
+
+        for player_index in player_indices:
+            time = time(match, player_index, word_index)
+
+            if time < fastest_time:
+                fastest_time = time
+                fastest[word_index] = [get_word(match, word_index)]
+            elif time == fastest_time:
+                fastest[word_index].append(get_word(match, word_index))
+    return fastest
     # END PROBLEM 10
 
 
