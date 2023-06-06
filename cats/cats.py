@@ -30,7 +30,11 @@ def pick(paragraphs, select, k):
     ''
     """
     # BEGIN PROBLEM 1
-    "*** YOUR CODE HERE ***"
+    selected = [p for p in paragraphs if select(p)]
+    if k < len(selected):
+        return selected[k]
+    else:
+        return ''
     # END PROBLEM 1
 
 
@@ -47,10 +51,22 @@ def about(subject):
     >>> pick(['Cute Dog!', 'That is a cat.', 'Nice pup.'], about_dogs, 1)
     'Nice pup.'
     """
-    assert all([lower(x) == x for x in subject]), 'subjects should be lowercase.'
-    # BEGIN PROBLEM 2
-    "*** YOUR CODE HERE ***"
-    # END PROBLEM 2
+    assert all([lower(x) == x for x in subject]
+               ), 'subjects should be lowercase.'
+
+    def select(paragraph):
+        # Remove punctuation and convert to lower case
+        processed_paragraph = ''.join(
+            c.lower() for c in paragraph if c.isalnum() or c.isspace())
+
+        # Split the paragraph into words
+        words = processed_paragraph.split()
+
+        # Return True if any word in the subject list is in the paragraph, False otherwise
+        return any(word in words for word in subject)
+
+    # Return the select function
+    return select
 
 
 def accuracy(typed, source):
@@ -78,9 +94,14 @@ def accuracy(typed, source):
     """
     typed_words = split(typed)
     source_words = split(source)
-    # BEGIN PROBLEM 3
-    "*** YOUR CODE HERE ***"
-    # END PROBLEM 3
+
+    if not typed_words and not source_words:
+        return 100.0
+    elif not typed_words or not source_words:
+        return 0.0
+
+    correct_words = sum(t == s for t, s in zip(typed_words, source_words))
+    return (correct_words / len(typed_words)) * 100
 
 
 def wpm(typed, elapsed):
@@ -97,7 +118,10 @@ def wpm(typed, elapsed):
     """
     assert elapsed > 0, 'Elapsed time must be positive'
     # BEGIN PROBLEM 4
-    "*** YOUR CODE HERE ***"
+    number_of_characters = len(typed)
+    elapsed_in_minutes = elapsed / 60
+    words_per_minute = (number_of_characters / 5) / elapsed_in_minutes
+    return words_per_minute
     # END PROBLEM 4
 
 
@@ -124,8 +148,22 @@ def autocorrect(typed_word, word_list, diff_function, limit):
     'testing'
     """
     # BEGIN PROBLEM 5
-    "*** YOUR CODE HERE ***"
-    # END PROBLEM 5
+    # Initialize minimum difference as positive infinity
+    min_difference = float('inf')
+    closest_match = typed_word  # Initialize closest match as the typed word itself
+
+    for word in word_list:
+        # Calculate the difference between typed_word and the current word
+        difference = diff_function(typed_word, word, limit)
+
+        if difference < min_difference:
+            min_difference = difference
+            closest_match = word
+
+    if min_difference > limit:
+        return typed_word  # If the minimum difference exceeds the limit, return the typed word
+    else:
+        return closest_match  # Otherwise, return the closest match    # END PROBLEM 5
 
 
 def feline_fixes(typed, source, limit):
@@ -268,8 +306,10 @@ def fastest_words(match):
     >>> p1
     [4, 1, 6]
     """
-    player_indices = range(len(get_all_times(match)))  # contains an *index* for each player
-    word_indices = range(len(get_all_words(match)))    # contains an *index* for each word
+    player_indices = range(len(get_all_times(match))
+                           )  # contains an *index* for each player
+    # contains an *index* for each word
+    word_indices = range(len(get_all_words(match)))
     # BEGIN PROBLEM 10
     "*** YOUR CODE HERE ***"
     # END PROBLEM 10
@@ -288,23 +328,30 @@ def match(words, times):
         words: ['Hello', 'world']
         times: [[5, 1], [4, 2]]
     """
-    assert all([type(w) == str for w in words]), 'words should be a list of strings'
-    assert all([type(t) == list for t in times]), 'times should be a list of lists'
-    assert all([isinstance(i, (int, float)) for t in times for i in t]), 'times lists should contain numbers'
-    assert all([len(t) == len(words) for t in times]), 'There should be one word per time.'
+    assert all([type(w) == str for w in words]
+               ), 'words should be a list of strings'
+    assert all([type(t) == list for t in times]
+               ), 'times should be a list of lists'
+    assert all([isinstance(i, (int, float))
+               for t in times for i in t]), 'times lists should contain numbers'
+    assert all([len(t) == len(words) for t in times]
+               ), 'There should be one word per time.'
     return {"words": words, "times": times}
 
 
 def get_word(match, word_index):
     """A utility function that gets the word with index word_index"""
-    assert 0 <= word_index < len(get_all_words(match)), "word_index out of range of words"
+    assert 0 <= word_index < len(get_all_words(
+        match)), "word_index out of range of words"
     return get_all_words(match)[word_index]
 
 
 def time(match, player_num, word_index):
     """A utility function for the time it took player_num to type the word at word_index"""
-    assert word_index < len(get_all_words(match)), "word_index out of range of words"
-    assert player_num < len(get_all_times(match)), "player_num out of range of players"
+    assert word_index < len(get_all_words(
+        match)), "word_index out of range of words"
+    assert player_num < len(get_all_times(
+        match)), "player_num out of range of players"
     return get_all_times(match)[player_num][word_index]
 
 
@@ -333,7 +380,7 @@ enable_multiplayer = False  # Change to True when you're ready to race.
 def run_typing_test(topics):
     """Measure typing speed and accuracy on the command line."""
     paragraphs = lines_from_file('data/sample_paragraphs.txt')
-    select = lambda p: True
+    def select(p): return True
     if topics:
         select = about(topics)
     i = 0
