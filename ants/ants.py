@@ -199,7 +199,8 @@ class ThrowerAnt(Ant):
 
 def random_bee(bees):
     """Return a random bee from a list of bees, or return None if bees is empty."""
-    assert isinstance(bees, list), "random_bee's argument should be a list but was a %s" % type(bees).__name__
+    assert isinstance(
+        bees, list), "random_bee's argument should be a list but was a %s" % type(bees).__name__
     if bees:
         return random.choice(bees)
 
@@ -339,7 +340,7 @@ class Water(Place):
 
 
 class QueenAnt(Ant):  # You should change this line
-# END Problem 12
+    # END Problem 12
     """QueenAnt is a ScubaThrower that boosts the damage of all ants behind her."""
 
     name = 'Queen'
@@ -631,7 +632,8 @@ class GameState:
                 place.entrance = beehive
                 self.bee_entrances.append(place)
         register_place(self.beehive, False)
-        create_places(self.base, register_place, self.dimensions[0], self.dimensions[1])
+        create_places(self.base, register_place,
+                      self.dimensions[0], self.dimensions[1])
 
     def simulate(self):
         """Simulate an attack on the ant colony (i.e., play the game)."""

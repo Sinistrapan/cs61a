@@ -18,7 +18,9 @@ The Hive is handled as a special case so that the player can visually inspect
 how many bees remain in the beehive.
 """
 
-import ants, ants_strategies
+from utils import *
+import ants
+import ants_strategies
 import graphics
 from graphics import shift_point
 from ucb import *
@@ -50,7 +52,7 @@ INSECT_FILES = {'Worker': 'ant_harvester.gif',
                 'Hornet': 'hornet.gif',
                 'NinjaBee': 'ninjabee.gif',
                 'Boss': 'boss.gif',
-}
+                }
 INSECT_BASE = 'img/'
 INSECT_FILES = {k: INSECT_BASE + v for k, v in INSECT_FILES.items()}
 TUNNEL_FILE = 'img/tunnel.gif'
@@ -116,7 +118,7 @@ class AntsGUI:
             img_pos = shift_point(panel_pos, PANEL_PADDING)
             self.canvas.draw_image(img_pos, INSECT_FILES[name])
             cost_pos = shift_point(panel_pos, (width / 2, ANT_IMAGE_HEIGHT + 4
-                + PANEL_PADDING[1]))
+                                               + PANEL_PADDING[1]))
             food_str = str(ant_type.food_cost)
             self.canvas.draw_text(food_str, cost_pos, anchor="center")
             panel_pos = shift_point(panel_pos, (width + 2, 0))
@@ -149,14 +151,14 @@ class AntsGUI:
                 elif ant_type is not None:
                     try:
                         print("gamestate.deploy_ant('{0}', '{1}')".format(name,
-                                                                       ant_type))
+                                                                          ant_type))
                         gamestate.deploy_ant(name, ant_type)
                         self._update_places(gamestate)
                     except Exception as e:
                         print(e)
             color = 'Blue' if place.name.startswith('water') else 'White'
             frame = self.add_click_rect(place_pos, width, height, on_click,
-                                             color=color)
+                                        color=color)
             self.canvas.draw_image(place_pos, TUNNEL_FILE)
             self.place_points[name] = place_pos
             self.images[name] = dict()
@@ -165,8 +167,9 @@ class AntsGUI:
         # Hive
         self.images[gamestate.beehive.name] = dict()
         self.place_points[gamestate.beehive.name] = (place_pos[0] + width,
-                                               HIVE_HEIGHT)
-        self.laser_end = (BEE_IMAGE_WIDTH + 2 * PLACE_PADDING[0]) * len(gamestate.places)
+                                                     HIVE_HEIGHT)
+        self.laser_end = (BEE_IMAGE_WIDTH + 2 *
+                          PLACE_PADDING[0]) * len(gamestate.places)
         for bee in gamestate.beehive.bees:
             self._draw_insect(bee, gamestate.beehive.name, True)
 
@@ -193,7 +196,7 @@ class AntsGUI:
                 self._interpret_click(pos, gamestate)
 
         # Throw leaves at the end of the turn
-        has_ant = lambda a: hasattr(a, 'ant_contained') and a.ant_contained
+        def has_ant(a): return hasattr(a, 'ant_contained') and a.ant_contained
         for ant in gamestate.ants + [a.ant_contained for a in gamestate.ants if has_ant(a)]:
             if ant.name in LEAF_COLORS:
                 self._throw(ant, gamestate)
@@ -235,18 +238,21 @@ class AntsGUI:
             # Add/move missing insects
             if place.ant is not None:
                 if isinstance(place.ant, ants.ContainerAnt) \
-                    and place.ant.ant_contained and place.ant.ant_contained not in current:
+                        and place.ant.ant_contained and place.ant.ant_contained not in current:
                     container = self.images[name][place.ant]
-                    self._draw_insect(place.ant.ant_contained, name, behind=container)
+                    self._draw_insect(place.ant.ant_contained,
+                                      name, behind=container)
                 if place.ant not in current:
                     self._draw_insect(place.ant, name)
             for bee in place.bees:
                 if bee not in current:
-                    other_places = [p for p, i in self.images.items() if bee in i]
+                    other_places = [
+                        p for p, i in self.images.items() if bee in i]
                     if other_places:
                         other_place = other_places[0]
                         image = self.images[other_place].pop(bee)
-                        pos = shift_point(self.place_points[name], PLACE_PADDING)
+                        pos = shift_point(
+                            self.place_points[name], PLACE_PADDING)
                         self.canvas.slide_shape(image, pos, STRATEGY_SECONDS)
                         self.images[name][bee] = image
                     else:
@@ -268,7 +274,8 @@ class AntsGUI:
         image_file = INSECT_FILES[insect.name]
         pos = shift_point(self.place_points[place_name], PLACE_PADDING)
         if random_offset:
-            pos = shift_point(pos, (random.randint(-10, 10), random.randint(-50, 50)))
+            pos = shift_point(
+                pos, (random.randint(-10, 10), random.randint(-50, 50)))
         image = self.canvas.draw_image(pos, image_file, behind=behind)
         self.images[place_name][insect] = image
 
@@ -276,8 +283,10 @@ class AntsGUI:
         """Animate a leaf thrown at a Bee."""
         bee = ant.nearest_bee()  # nearest_bee logic from ants.py
         if bee:
-            start = shift_point(self.place_points[ant.place.name], LEAF_START_OFFSET)
-            end = shift_point(self.place_points[bee.place.name], LEAF_END_OFFSET)
+            start = shift_point(
+                self.place_points[ant.place.name], LEAF_START_OFFSET)
+            end = shift_point(
+                self.place_points[bee.place.name], LEAF_END_OFFSET)
             animate_leaf(self.canvas, start, end, color=LEAF_COLORS[ant.name])
 
 
@@ -297,7 +306,7 @@ def animate_leaf(canvas, start, end, duration=0.3, color='ForestGreen'):
     """Define the animation frames for a thrown leaf."""
     length = 40
     leaf = canvas.draw_polygon(leaf_coords(start, 0, length),
-            color='DarkGreen', fill_color=color, smooth=1)
+                               color='DarkGreen', fill_color=color, smooth=1)
     num_frames = duration / graphics.FRAME_TIME
     increment = tuple([(e - s) / num_frames for s, e in zip(start, end)])
 
@@ -311,11 +320,8 @@ def animate_leaf(canvas, start, end, duration=0.3, color='ForestGreen'):
     canvas._canvas.after(int(1000 * duration) + 1, lambda: canvas.clear(leaf))
 
 
-from utils import *
-
-
 @main
 def run(*args):
     ants.Insect.reduce_health = class_method_wrapper(ants.Insect.reduce_health,
-            pre=print_expired_insects)
+                                                     pre=print_expired_insects)
     ants_strategies.start_with_strategy(args, AntsGUI().strategy, ants)
