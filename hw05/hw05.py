@@ -8,11 +8,20 @@ def hailstone(n):
     >>> next(hail_gen)
     1
     """
-    "*** YOUR CODE HERE ***"
+    yield n
+    if n == 1:
+        while True:
+            yield 1
+    elif n % 2 == 0:
+        yield from hailstone(n // 2)
+    else:
+        yield from hailstone(n * 3 + 1)
 
 
 def merge(a, b):
     """
+    Merges two infinite generators a and b in increasing order without duplicates.
+
     >>> def sequence(start, step):
     ...     while True:
     ...         yield start
@@ -23,7 +32,20 @@ def merge(a, b):
     >>> [next(result) for _ in range(10)]
     [2, 3, 5, 7, 8, 9, 11, 13, 14, 15]
     """
-    "*** YOUR CODE HERE ***"
+
+    value_a = next(a)
+    value_b = next(b)
+    while True:
+        if value_a < value_b:
+            yield value_a
+            value_a = next(a)
+        elif value_a > value_b:
+            yield value_b
+            value_b = next(b)
+        else:
+            yield value_a
+            value_a = next(a)
+            value_b = next(b)
 
 
 def perms(seq):
@@ -48,7 +70,15 @@ def perms(seq):
     >>> sorted(perms("ab"))
     [['a', 'b'], ['b', 'a']]
     """
-    "*** YOUR CODE HERE ***"
+
+    seq = list(seq)
+    if len(seq) <= 1:
+        yield seq
+    else:
+        for i in range(len(seq)):
+            rest = seq[:i] + seq[i+1:]
+            for p in perms(rest):
+                yield [seq[i]] + p
 
 
 def yield_paths(t, value):
@@ -85,10 +115,12 @@ def yield_paths(t, value):
     >>> sorted(list(path_to_2))
     [[0, 2], [0, 2, 1, 2]]
     """
-    "*** YOUR CODE HERE ***"
-    for _______________ in _________________:
-        for _______________ in _________________:
-            "*** YOUR CODE HERE ***"
+
+    if label(t) == value:
+        yield [label(t)]
+    for b in branches(t):
+        for path in yield_paths(b, value):
+            yield [label(t)] + path
 
 
 def remainders_generator(m):
@@ -122,7 +154,13 @@ def remainders_generator(m):
     7
     11
     """
-    "*** YOUR CODE HERE ***"
+
+    def generator_with_remainder(remainder):
+        for n in naturals():
+            if n % m == remainder:
+                yield n
+
+    return (generator_with_remainder(i) for i in range(m))
 
 
 # Tree ADT
