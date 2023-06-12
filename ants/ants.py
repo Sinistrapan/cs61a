@@ -276,19 +276,16 @@ class FireAnt(Ant):
         Make sure to reduce the health of each bee in the current place, and apply
         the additional damage if the fire ant dies.
         """
-        self.health -= amount    # Reduce the health of the FireAnt
-
-        # Reduce the health of each bee in the current place
-        if self.health <= 0:
-
+        if self.health <= amount:
             # FireAnt died, apply additional damage
-            reflected_damage = amount + self.damage
-
             for bee in self.place.bees[:]:
-                bee.reduce_health(reflected_damage)
+                bee.reduce_health(amount + self.damage)
 
-            # Remove the FireAnt from its place
-            self.place.remove_insect(self)
+            Ant.reduce_health(self, amount)
+        else:
+            Ant.reduce_health(self, amount)
+            for bee in self.place.bees[:]:
+                bee.reduce_health(amount)
         # END Problem 5
 
 
@@ -380,7 +377,8 @@ class BodyguardAnt(ContainerAnt):
     food_cost = 4
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem 8c
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
+
     # END Problem 8c
 
 # BEGIN Problem 9
