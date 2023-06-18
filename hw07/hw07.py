@@ -17,6 +17,14 @@ def store_digits(n):
     >>> link1 = Link(3, Link(Link(4), Link(5, Link(6))))
     """
     "*** YOUR CODE HERE ***"
+    for i in range(len(str(n))):
+        if i == 0:
+            s = Link(n % 10)
+            n = n // 10
+            return s
+        else:
+            s = Link(n % 10, s)
+            n = n // 10
 
 
 def deep_map_mut(func, lnk):
