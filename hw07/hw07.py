@@ -17,14 +17,11 @@ def store_digits(n):
     >>> link1 = Link(3, Link(Link(4), Link(5, Link(6))))
     """
     "*** YOUR CODE HERE ***"
-    for i in range(len(str(n))):
-        if i == 0:
-            s = Link(n % 10)
-            n = n // 10
-            return s
-        else:
-            s = Link(n % 10, s)
-            n = n // 10
+    s = Link.empty
+    while n > 0:
+        n, last = n // 10, n % 10
+        s = Link(last, s)
+    return s
 
 
 def deep_map_mut(func, lnk):
@@ -45,6 +42,13 @@ def deep_map_mut(func, lnk):
     <9 <16> 25 36>
     """
     "*** YOUR CODE HERE ***"
+    if lnk is Link.empty:
+        return
+    if isinstance(lnk.first, Link):
+        deep_map_mut(func, lnk.first)
+    elif isinstance(lnk.first, int):
+        lnk.first = func(lnk.first)
+    deep_map_mut(func, lnk.rest)
 
 
 def two_list(vals, counts):
@@ -66,6 +70,34 @@ def two_list(vals, counts):
     Link(1, Link(1, Link(3, Link(3, Link(2)))))
     """
     "*** YOUR CODE HERE ***"
+    new_list = []
+    for i in range(len(vals)):
+        new_list.extend([vals[i]] * counts[i])
+    # sum([[vals[i]] * counts[i] for i in range(len(vals))], [])
+
+    def build_link(s):
+        if not s:
+            return Link.empty
+        else:
+            return Link(s[0], build_link(s[1:]))
+    return build_link(new_list)
+
+    # Alternative solutions
+    result = Link(None)
+    p = result
+    for i in range(len(vals)):   # [1, 2, 3]
+        element = vals[i]
+        for _ in range(counts[i]):
+            p.rest = Link(element)
+            p = p.rest
+    return result.rest
+
+    # Alternative solutions    rest = Link.empty
+    for i in range(len(vals), 0, -1):    # [2, 3, 1]
+        element = vals[i-1]
+        for _ in range(vals[i-1]):
+            rest = Link(element, rest)
+    return rest
 
 
 def add_d_leaves(t, v):
@@ -127,6 +159,11 @@ def add_d_leaves(t, v):
         10
     """
     "*** YOUR CODE HERE ***"
+    def add_leaves(t, d):
+        for b in t.branches:
+            add_leaves(b, d + 1)
+        t.branches.extend([Tree(v) for _ in range(d)])
+    add_leaves(t, 0)
 
 
 class Link:
